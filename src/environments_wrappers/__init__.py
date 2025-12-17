@@ -134,4 +134,20 @@ def startSim(cfg: dict):
 
         SM = SDG_SimulationManager(cfg, simulation_app)
 
+
+    if cfg["mode"]["name"] == "SDG_SLAM":
+        from src.environments_wrappers.ros2 import enable_ros2
+
+        enable_ros2(simulation_app, bridge_name="humble")
+        import rclpy
+
+        rclpy.init()
+
+        # Call to the environment factory to load the correct environment.
+        from src.environments_wrappers.sdg.simulation_manager_sdg import (
+            SDG_SLAM_SimulationManager,
+        )
+
+        SM = SDG_SLAM_SimulationManager(cfg, simulation_app)
+
     return SM, simulation_app

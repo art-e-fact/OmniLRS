@@ -44,6 +44,7 @@ RUN apt-get update && apt-get install -y \
   ros-${ROS_DISTRO}-tf2-msgs \  
   g++ \
   wget \
+  ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
   && rm -rf /var/lib/apt/lists/*
  
 RUN /isaac-sim/python.sh -m pip install \
@@ -60,7 +61,8 @@ RUN /isaac-sim/python.sh -m pip install gdal==$(gdal-config --version)
 
 # isaac ros2_bridge config  
 ENV isaac_sim_package_path=/isaac-sim
-ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+ENV ROS_DOMAIN_ID=50
 ENV LD_LIBRARY_PATH=/isaac-sim/exts/isaacsim.ros2.bridge/humble/lib
 
 ## For convenience:

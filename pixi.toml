@@ -75,7 +75,7 @@ asyncio_for_robotics = "*"
 msgspec = "*"
 
 [feature.zenoh.tasks]
-# zenoh = "python run.py mode=Zenoh"
+zenoh = "python run.py mode=Zenoh"
 
 [environments]
 default = { features = ["core", "isaac"] }

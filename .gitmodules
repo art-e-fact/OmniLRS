@@ -2,6 +2,3 @@
 	path = WorldBuilders
 	url = https://github.com/AntoineRichard/WorldBuilders.git
 	branch = main
-[submodule "external/omnilrs_artefacts"]
-	path = external/omnilrs_artefacts
-	url = git@github.com:ssf-thku/OmniLRS-artefacts.git

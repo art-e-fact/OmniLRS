@@ -1,7 +1,7 @@
 name: Zenoh
 sensors:
   camera:
-    base_keyexpr: "OmniLRS/Husky/Camera"
+    base_keyexpr: "OmniLRS/ssf_rover/camera"
     resolution: "high" # "low" or "high"
     json_compact: False #True
   

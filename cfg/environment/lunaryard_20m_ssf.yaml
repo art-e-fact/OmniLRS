@@ -347,4 +347,4 @@ robots_settings:
           prim_path: "/Robots/ssf_rover/l_FisheyeCam_ROS/fisheye_cam"
           resolutions:
             low: [320, 240]
-            high: [640, 480]
+            high: [1440, 1080]

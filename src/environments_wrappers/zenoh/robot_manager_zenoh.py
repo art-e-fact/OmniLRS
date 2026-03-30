@@ -33,13 +33,14 @@ class Zenoh_RobotManager():
         self.transports = []
         self.cams = {}
         for robot in RM_conf["parameters"]:
-            ### TODO: each robot should have multiple cameras
-            cam_pub = ZenohPubTransport(
-                keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"]["name"]}',
-                json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
-            )
-            self.cams[f'/{robot["robot_name"]}'] = cam_pub
-            self.transports.append(cam_pub)
+            self.cams[f'/{robot["robot_name"]}'] = []
+            for i, camera in enumerate(robot["camera"]):
+                cam_pub = ZenohPubTransport(
+                    keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"][i]["name"]}',
+                    json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
+                )
+                self.cams[f'/{robot["robot_name"]}'].append(cam_pub)
+                self.transports.append(cam_pub)
         
         self.resolution = zenoh_conf["sensors"]["camera"]["resolution"]
 
@@ -82,13 +83,14 @@ class Zenoh_RobotManager():
         Publish current frame from each camera
         """
         if self.transports_inited:
-            for i, robot_name in enumerate(self.RM.robots.keys()):
-                frame = self.RM.robots[robot_name].get_rgba_camera_view(self.resolution)
-                if frame.size!=0:
-                    encoded = self.encode_image(frame)
+            for robot_name in self.RM.robots.keys():
+                for i, cam in enumerate(self.cams[f'/{robot_name}']):
+                    frame = self.RM.robots[robot_name].get_rgba_camera_view_by_idx(i, self.resolution)
+                    if frame.size!=0:
+                        encoded = self.encode_image(frame)
 
-                    ## TODO: add new publish_numpy() in omnilrs-artefacts 
-                    self.cams[robot_name]._pub.put(encoded)
+                        ## TODO: add new publish_numpy() in omnilrs-artefacts 
+                        cam._pub.put(encoded)
 
     def encode_image(self, im):
         encoded = WireNDArray.pack(im)

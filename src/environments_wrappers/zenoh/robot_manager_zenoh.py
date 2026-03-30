@@ -84,7 +84,7 @@ class Zenoh_RobotManager():
         """
         if self.transports_inited:
             for robot_name in self.RM.robots.keys():
-                for i, cam in enumerate(self.cams[f'/{robot_name}']):
+                for i, cam in enumerate(self.cams[f'{robot_name}']):
                     frame = self.RM.robots[robot_name].get_rgba_camera_view_by_idx(i, self.resolution)
                     if frame.size!=0:
                         encoded = self.encode_image(frame)

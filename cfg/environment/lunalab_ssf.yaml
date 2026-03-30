@@ -181,7 +181,13 @@ robots_settings:
       camera:
         -
           name: "cam_front"
-          prim_path: "/Robots/husky/d455/RSD455/Camera_OmniVision_OV9782_Color"
+          prim_path: "/Robots/ssf_rover/l_Body_ROS/l_eye_base_ROS/l_eye_2_ROS/eye_left"
           resolutions: 
+            low: [320, 240]
+            high: [1440, 1080]
+        -
+          name: "cam_fisheye"
+          prim_path: "/Robots/ssf_rover/l_FisheyeCam_ROS/fisheye_cam"
+          resolutions:
             low: [320, 240]
             high: [1440, 1080]

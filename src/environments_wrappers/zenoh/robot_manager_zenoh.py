@@ -18,8 +18,7 @@ from src.robots.robot import RobotManager
 
 module_path = os.path.abspath(f"{os.path.dirname(__file__)}/../../../external/omnilrs_artefacts/src")
 sys.path.append(module_path)
-from omnilrs_artefacts.control.articulation_controller import \
-    ArticulationController
+from omnilrs_artefacts.control.articulation_controller import ArticulationController
 from omnilrs_artefacts.telemetry.joint_force_bridge import JointForceBridge
 from omnilrs_artefacts.transport.zenoh_cmd import ZenohCommandReceiver
 from omnilrs_artefacts.transport.zenoh_pub import ZenohPubTransport
@@ -37,27 +36,37 @@ class Zenoh_RobotManager:
 
         self.transports = []
         self.cams = {}
-        self.joint_bridges ={}
+        self.joint_bridges = {}
+        self.controllers = {}
+        self.cmd_receivers = {}
 
         for robot in RM_conf["parameters"]:
+            robot_name = f'{robot["robot_name"]}'
+            robot_path = self.RM.robots_root + "/" + robot_name
             ### TODO: each robot should have multiple cameras
             cam_pub = ZenohPubTransport(
                 keyexpr=f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"]["name"]}',
                 json_compact=zenoh_conf["sensors"]["camera"]["json_compact"],
             )
             self.cams[f'/{robot["robot_name"]}'] = cam_pub
-            self.transports.append(cam_pub)
 
-
-        for robot in RM_conf["parameters"]:
-            robot_name = f'/{robot["robot_name"]}'
-            robot_path = self.RM.robots_root + robot_name
             self.joint_bridges[robot_name] = JointForceBridge(
                 transports=[
-                    {"type": "zenoh", "keyexpr": "husky/joint_telemetry"},
+                    {"type": "zenoh", "keyexpr": f"{robot_name}/joint_telemetry"},
                 ],
-                robot_root_prim=robot_path
+                robot_root_prim=robot_path,
             )
+
+            self.controllers[robot_name] = ArticulationController(
+                prim_path=robot_path,
+            )
+
+            self.cmd_receivers[robot_name] = ZenohCommandReceiver(
+                controller=self.controllers[robot_name],
+                keyexpr=f"{robot_name}/joint_cmd",
+            )
+
+            self.transports.append(cam_pub)
 
         self.resolution = zenoh_conf["sensors"]["camera"]["resolution"]
 
@@ -114,8 +123,17 @@ class Zenoh_RobotManager:
 
     def publish_telemetry(self) -> None:
         for robot in self.RM.robots.values():
-            self.joint_bridges[robot.robot_name].maybe_initialize()
-            self.joint_bridges[robot.robot_name].update()
+            self.joint_bridges[robot.robot_name.strip("/")].maybe_initialize()
+            self.joint_bridges[robot.robot_name.strip("/")].update()
+
+    def update_controller(self) -> None:
+        for robot in self.RM.robots.values():
+            self.controllers[robot.robot_name.strip("/")].maybe_initialize()
+            self.controllers[robot.robot_name.strip("/")].update()
+
+    def update_cmd(self) -> None:
+        for robot in self.RM.robots.values():
+            self.cmd_receivers[robot.robot_name.strip("/")].start()
 
 
 ## TODO: move this WireNDArray to new publish_numpy() in omnilrs-artefacts
@@ -131,4 +149,3 @@ class WireNDArray(msgspec.Struct, array_like=True, kw_only=True):
 
     def unpack(self) -> np.ndarray:
         return np.frombuffer(self.data, dtype=self.dtype).reshape(self.shape)
-

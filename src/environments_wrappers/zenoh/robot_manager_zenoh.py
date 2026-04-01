@@ -8,7 +8,8 @@ __status__ = "development"
 
 import os
 import sys
-from typing import List, Tuple
+import time
+from typing import Dict, List, Tuple
 
 import msgspec
 import numpy as np
@@ -39,6 +40,7 @@ class Zenoh_RobotManager:
         self.joint_bridges = {}
         self.controllers = {}
         self.cmd_receivers = {}
+        self.gts = {}
 
         for robot in RM_conf["parameters"]:
             robot_name = f'{robot["robot_name"]}'
@@ -47,6 +49,10 @@ class Zenoh_RobotManager:
             cam_pub = ZenohPubTransport(
                 keyexpr=f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"]["name"]}',
                 json_compact=zenoh_conf["sensors"]["camera"]["json_compact"],
+            )
+            gt_pub = ZenohPubTransport(
+                keyexpr=f"{robot_name}/gt_pose",
+                json_compact=False,
             )
             self.cams[f'/{robot["robot_name"]}'] = cam_pub
 
@@ -66,7 +72,10 @@ class Zenoh_RobotManager:
                 keyexpr=f"{robot_name}/joint_cmd",
             )
 
+            self.gts[robot_name] = gt_pub
+
             self.transports.append(cam_pub)
+            self.transports.append(gt_pub)
 
         self.resolution = zenoh_conf["sensors"]["camera"]["resolution"]
 
@@ -135,6 +144,24 @@ class Zenoh_RobotManager:
         for robot in self.RM.robots.values():
             self.cmd_receivers[robot.robot_name.strip("/")].start()
 
+    def publish_gt(self) -> None:
+        if self.transports_inited:
+            for robot in self.RM.robots.values():
+                pos, quat = robot.get_pose()
+
+                gt = {
+                    "stamp_s": time.time(),
+                    "robot_name": robot.robot_name,
+                    "position": [float(pos[0]), float(pos[1]), float(pos[2])],
+                    "orientation_xyzw": [
+                        float(quat[0]),
+                        float(quat[1]),
+                        float(quat[2]),
+                        float(quat[3]),
+                    ],
+                }
+
+                self.gts[robot.robot_name.strip("/")].publish(gt)
 
 ## TODO: move this WireNDArray to new publish_numpy() in omnilrs-artefacts
 class WireNDArray(msgspec.Struct, array_like=True, kw_only=True):

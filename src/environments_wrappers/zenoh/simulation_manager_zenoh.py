@@ -263,6 +263,8 @@ class Zenoh_SimulationManager:
         if self.ZenohRobotManager.transports_inited:
             self.ZenohRobotManager.publish_cameras()
             self.ZenohRobotManager.publish_telemetry()
+            self.ZenohRobotManager.update_controller()
+            self.ZenohRobotManager.update_cmd()
 
         self.rate.sleep()
 
@@ -291,6 +293,15 @@ class Zenoh_SimulationManager:
 
         for t in self.ZenohRobotManager.transports:
             t.close()
+
+        for bridge in self.ZenohRobotManager.joint_bridges.values():
+            bridge.close()
+
+        for controller in self.ZenohRobotManager.controllers.values():
+            controller.close()
+
+        for receiver in self.ZenohRobotManager.cmd_receivers.values():
+            receiver.close()
 
         self.world.stop()
         self.timeline.stop()

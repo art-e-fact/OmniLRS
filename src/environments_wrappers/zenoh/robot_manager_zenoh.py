@@ -40,21 +40,24 @@ class Zenoh_RobotManager():
         self.cmd_receivers = {}
 
         for robot in RM_conf["parameters"]:
+            robot_name = f'{robot["robot_name"]}'
+            robot_path = self.RM.robots_root + "/" + robot_name
             self.cams[f'/{robot["robot_name"]}'] = []
+
             if isinstance(robot["camera"], list):
                 for i, camera in enumerate(robot["camera"]):
                     cam_pub = ZenohPubTransport(
                         keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"][i]["name"]}',
                         json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
                     )
-                    self.cams[f'/{robot["robot_name"]}'].append(cam_pub)
+                    self.cams[f'/{robot_name}'].append(cam_pub)
                     self.transports.append(cam_pub)
             else:
                 cam_pub = ZenohPubTransport(
                     keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"]["name"]}',
                     json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
                 )
-                self.cams[f'/{robot["robot_name"]}'].append(cam_pub)
+                self.cams[f'/{robot_name}'].append(cam_pub)
                 self.transports.append(cam_pub)
 
 

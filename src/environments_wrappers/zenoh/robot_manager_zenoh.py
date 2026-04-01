@@ -34,14 +34,23 @@ class Zenoh_RobotManager():
         self.cams = {}
         for robot in RM_conf["parameters"]:
             self.cams[f'/{robot["robot_name"]}'] = []
-            for i, camera in enumerate(robot["camera"]):
+            if isinstance(robot["camera"], list):
+                for i, camera in enumerate(robot["camera"]):
+                    cam_pub = ZenohPubTransport(
+                        keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"][i]["name"]}',
+                        json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
+                    )
+                    self.cams[f'/{robot["robot_name"]}'].append(cam_pub)
+                    self.transports.append(cam_pub)
+            else:
                 cam_pub = ZenohPubTransport(
-                    keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"][i]["name"]}',
+                    keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"]["name"]}',
                     json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
                 )
                 self.cams[f'/{robot["robot_name"]}'].append(cam_pub)
                 self.transports.append(cam_pub)
-        
+
+
         self.resolution = zenoh_conf["sensors"]["camera"]["resolution"]
 
         self.transports_inited = False
@@ -85,7 +94,11 @@ class Zenoh_RobotManager():
         if self.transports_inited:
             for robot_name in self.RM.robots.keys():
                 for i, cam in enumerate(self.cams[f'{robot_name}']):
-                    frame = self.RM.robots[robot_name].get_rgba_camera_view_by_idx(i, self.resolution)
+                    if len(self.cams[f'{robot_name}'])>1:
+                        frame = self.RM.robots[robot_name].get_rgba_camera_view_by_idx(i, self.resolution)
+                    else:
+                        frame = self.RM.robots[robot_name].get_rgba_camera_view(self.resolution)
+
                     if frame.size!=0:
                         encoded = self.encode_image(frame)
 

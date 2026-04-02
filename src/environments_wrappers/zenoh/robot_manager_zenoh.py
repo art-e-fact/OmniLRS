@@ -15,8 +15,6 @@ import numpy as np
 from src.configurations.simulator_mode_enum import SimulatorMode
 from src.robots.robot import RobotManager
 
-module_path = os.path.abspath(f"{os.path.dirname(__file__)}/../../../external/omnilrs_artefacts/src")
-sys.path.append(module_path)
 from omnilrs_artefacts.control.articulation_controller import ArticulationController
 from omnilrs_artefacts.telemetry.joint_force_bridge import JointForceBridge
 from omnilrs_artefacts.transport.zenoh_cmd import ZenohCommandReceiver

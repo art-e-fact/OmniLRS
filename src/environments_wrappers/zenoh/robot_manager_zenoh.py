@@ -6,14 +6,23 @@ __maintainer__ = "Louis Burtz"
 __email__ = "ljburtz@jaops.com"
 __status__ = "development"
 
-from typing import List, Tuple
 import os
 import sys
+import time
+from typing import Callable, Dict, List, Tuple
+
 import msgspec
 import numpy as np
 
 from src.configurations.simulator_mode_enum import SimulatorMode
 from src.robots.robot import RobotManager
+
+try:
+    import omnilrs_artefacts
+except ImportError:
+    # just in case
+    module_path = os.path.abspath(f"{os.path.dirname(__file__)}/../../../external/omnilrs_artefacts/src")
+    sys.path.append(module_path)
 
 from omnilrs_artefacts.control.articulation_controller import ArticulationController
 from omnilrs_artefacts.telemetry.joint_force_bridge import JointForceBridge
@@ -21,7 +30,7 @@ from omnilrs_artefacts.transport.zenoh_cmd import ZenohCommandReceiver
 from omnilrs_artefacts.transport.zenoh_pub import ZenohPubTransport
 
 
-class Zenoh_RobotManager():
+class Zenoh_RobotManager:
     """
     Zenoh wrapper that manages the robots.
     """
@@ -29,32 +38,40 @@ class Zenoh_RobotManager():
     def __init__(self, RM_conf: dict, zenoh_conf: dict) -> None:
         self.RM = RobotManager(RM_conf, mode=SimulatorMode.ZENOH)
 
-        self.modifications: List[Tuple[callable, dict]] = []
+        self.modifications: List[Tuple[Callable, dict]] = []
 
         self.transports = []
         self.cams = {}
         self.joint_bridges = {}
         self.controllers = {}
         self.cmd_receivers = {}
+        self.gts = {}
 
         for robot in RM_conf["parameters"]:
+            robot_name = f'{robot["robot_name"]}'
+            robot_path = self.RM.robots_root + "/" + robot_name
             self.cams[f'/{robot["robot_name"]}'] = []
+
             if isinstance(robot["camera"], list):
                 for i, camera in enumerate(robot["camera"]):
                     cam_pub = ZenohPubTransport(
-                        keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"][i]["name"]}',
-                        json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
+                        keyexpr=f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"][i]["name"]}',
+                        json_compact=zenoh_conf["sensors"]["camera"]["json_compact"],
                     )
-                    self.cams[f'/{robot["robot_name"]}'].append(cam_pub)
+                    self.cams[f"/{robot_name}"].append(cam_pub)
                     self.transports.append(cam_pub)
             else:
                 cam_pub = ZenohPubTransport(
-                    keyexpr = f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"]["name"]}',
-                    json_compact = zenoh_conf["sensors"]["camera"]["json_compact"],
+                    keyexpr=f'{zenoh_conf["sensors"]["camera"]["base_keyexpr"]}/{robot["camera"]["name"]}',
+                    json_compact=zenoh_conf["sensors"]["camera"]["json_compact"],
                 )
-                self.cams[f'/{robot["robot_name"]}'].append(cam_pub)
+                self.cams[f"/{robot_name}"].append(cam_pub)
                 self.transports.append(cam_pub)
 
+            gt_pub = ZenohPubTransport(
+                keyexpr=f"{robot_name}/gt_pose",
+                json_compact=False,
+            )
 
             self.joint_bridges[robot_name] = JointForceBridge(
                 transports=[
@@ -72,24 +89,27 @@ class Zenoh_RobotManager():
                 keyexpr=f"{robot_name}/joint_cmd",
             )
 
+            self.gts[robot_name] = gt_pub
+
+            self.transports.append(gt_pub)
+
         self.resolution = zenoh_conf["sensors"]["camera"]["resolution"]
 
         self.transports_inited = False
-        
-    
+
     def reset(self) -> None:
         """
         Resets the robots to their initial state.
         """
         self.clear_modifications()
         self.reset_robots()
-    
+
     def clear_modifications(self) -> None:
         """
         Clears the list of modifications to be applied to the lab.
         """
-        self.modifications: List[Tuple[callable, dict]] = []
-    
+        self.modifications: List[Tuple[Callable, dict]] = []
+
     def apply_modifications(self) -> None:
         """
         Applies the list of modifications to the lab.
@@ -114,16 +134,16 @@ class Zenoh_RobotManager():
         """
         if self.transports_inited:
             for robot_name in self.RM.robots.keys():
-                for i, cam in enumerate(self.cams[f'{robot_name}']):
-                    if len(self.cams[f'{robot_name}'])>1:
+                for i, cam in enumerate(self.cams[f"{robot_name}"]):
+                    if len(self.cams[f"{robot_name}"]) > 1:
                         frame = self.RM.robots[robot_name].get_rgba_camera_view_by_idx(i, self.resolution)
                     else:
                         frame = self.RM.robots[robot_name].get_rgba_camera_view(self.resolution)
 
-                    if frame.size!=0:
+                    if frame.size != 0:
                         encoded = self.encode_image(frame)
 
-                        ## TODO: add new publish_numpy() in omnilrs-artefacts 
+                        ## TODO: add new publish_numpy() in omnilrs-artefacts
                         cam._pub.put(encoded)
 
     def encode_image(self, im):
@@ -145,6 +165,25 @@ class Zenoh_RobotManager():
         for robot in self.RM.robots.values():
             self.cmd_receivers[robot.robot_name.strip("/")].start()
 
+    def publish_gt(self) -> None:
+        if self.transports_inited:
+            for robot in self.RM.robots.values():
+                pos, quat = robot.get_pose()
+
+                gt = {
+                    "stamp_s": time.time(),
+                    "robot_name": robot.robot_name,
+                    "position": [float(pos[0]), float(pos[1]), float(pos[2])],
+                    "orientation_xyzw": [
+                        float(quat[0]),
+                        float(quat[1]),
+                        float(quat[2]),
+                        float(quat[3]),
+                    ],
+                }
+
+                self.gts[robot.robot_name.strip("/")].publish(gt)
+
 
 ## TODO: move this WireNDArray to new publish_numpy() in omnilrs-artefacts
 class WireNDArray(msgspec.Struct, array_like=True, kw_only=True):
@@ -156,6 +195,6 @@ class WireNDArray(msgspec.Struct, array_like=True, kw_only=True):
     @classmethod
     def pack(cls, arr: np.ndarray):
         return cls(data=arr.data, dtype=str(arr.dtype), shape=arr.shape)
-    
+
     def unpack(self) -> np.ndarray:
         return np.frombuffer(self.data, dtype=self.dtype).reshape(self.shape)

@@ -263,6 +263,7 @@ class Zenoh_SimulationManager:
         if self.ZenohRobotManager.transports_inited:
             self.ZenohRobotManager.publish_cameras()
             self.ZenohRobotManager.publish_telemetry()
+            self.ZenohRobotManager.publish_gt()
             self.ZenohRobotManager.update_controller()
             self.ZenohRobotManager.update_cmd()
 

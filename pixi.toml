@@ -39,7 +39,7 @@ em = "*"
 lark = "*"
 pandas = "*"
 # omnilrs_artefacts = {path = "omnilrs_artefacts", editable=true} # use this when you download the repo manually
-omnilrs_artefacts = {git = "ssh://git@github.com/ssf-thku/OmniLRS-artefacts.git", rev="1c6cae781d614d6264466cd4f33057e5a5caf13f"}
+omnilrs_artefacts = {git = "ssh://git@github.com/ssf-thku/OmniLRS-artefacts.git", branch="CI-work"}
 OmniLRS = { path = ".", editable = true }
 
 [feature.core.activation.env]

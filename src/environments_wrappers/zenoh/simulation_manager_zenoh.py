@@ -295,14 +295,9 @@ class Zenoh_SimulationManager:
         for t in self.ZenohRobotManager.transports:
             t.close()
 
-        for bridge in self.ZenohRobotManager.joint_bridges.values():
-            bridge.close()
-
-        for controller in self.ZenohRobotManager.controllers.values():
-            controller.close()
-
-        for receiver in self.ZenohRobotManager.cmd_receivers.values():
-            receiver.close()
+        self.ZenohRobotManager.joint_bridge.close()
+        self.ZenohRobotManager.controller.close()
+        self.ZenohRobotManager.cmd_receiver.close()
 
         self.world.stop()
         self.timeline.stop()

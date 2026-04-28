@@ -13,21 +13,13 @@ from typing import Callable, Dict, List, Tuple
 
 import msgspec
 import numpy as np
-
-from src.configurations.simulator_mode_enum import SimulatorMode
-from src.robots.robot import RobotManager
-
-try:
-    import omnilrs_artefacts
-except ImportError:
-    # just in case
-    module_path = os.path.abspath(f"{os.path.dirname(__file__)}/../../../external/omnilrs_artefacts/src")
-    sys.path.append(module_path)
-
 from omnilrs_artefacts.control.articulation_controller import ArticulationController
 from omnilrs_artefacts.telemetry.joint_force_bridge import JointForceBridge
 from omnilrs_artefacts.transport.zenoh_cmd import ZenohCommandReceiver
 from omnilrs_artefacts.transport.zenoh_pub import ZenohPubTransport
+
+from src.configurations.simulator_mode_enum import SimulatorMode
+from src.robots.robot import RobotManager
 
 
 class Zenoh_RobotManager:
@@ -163,6 +155,7 @@ class Zenoh_RobotManager:
         self.cmd_receiver.start()
 
     def publish_gt(self) -> None:
+        return
         if self.transports_inited:
             pos, quat = self.RM.robot.get_pose()
 

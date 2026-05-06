@@ -57,7 +57,7 @@ class IMUBridge:
 
     def update(self):
         """
-        Publish current frame from each camera
+        Publish current imu readings
         """
         if not self._inited or self.RM.robot_parameters.imu_sensor_path == "":
             return False

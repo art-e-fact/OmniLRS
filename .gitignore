@@ -26,3 +26,5 @@ test/venv/
 test/outputs/
 
 src/OmniLRS.egg-info/
+
+Session.vim

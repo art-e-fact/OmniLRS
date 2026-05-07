@@ -13,9 +13,6 @@ description = "Pixi environments for OmniLRS with Isaac Sim 5 and manager-specif
 [system-requirements]
 libc = { family = "glibc", version = "2.35" }
 
-[tasks]
-download_omnilrs_artefacts = "git clone git@github.com:ssf-thku/OmniLRS-artefacts.git -b CI-work ./external/omnilrs_artefacts"
-
 [pypi-options]
 index-url = "https://pypi.org/simple"
 extra-index-urls = ["https://pypi.nvidia.com"]
@@ -38,8 +35,6 @@ gdown = "*"
 em = "*"
 lark = "*"
 pandas = "*"
-# omnilrs_artefacts = {path = "omnilrs_artefacts", editable=true} # use this when you download the repo manually
-omnilrs_artefacts = {git = "ssh://git@github.com/ssf-thku/OmniLRS-artefacts.git", branch="CI-work"}
 motion_stack = { git = "ssh://git@github.com/2lian/motion-stack-2.git", subdirectory = "src/motion_stack" }
 OmniLRS = { path = ".", editable = true }
 
@@ -89,8 +84,8 @@ ms_zenoh_bridge = { git = "ssh://git@github.com/2lian/motion-stack-2.git", branc
 msgspec = "*"
 
 [feature.zenoh.tasks]
-zenoh = "python run.py mode=Zenoh environment=lunaryard_20m_ssf"
-zenoh_large = "python run.py mode=Zenoh environment=largescale_ssf"
+zenoh = "python run.py mode=Zenoh environment=lunaryard_20m_zenoh"
+zenoh_large = "python run.py mode=Zenoh environment=largescale_zenoh"
 
 [environments]
 default = { features = ["core", "isaac"] }

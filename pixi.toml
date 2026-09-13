@@ -80,8 +80,8 @@ fix-tmp = "bash scripts/fix_yamcs_tmp.sh"
 
 # zenoh-specific deps, tasks in feature "zenoh"
 [feature.zenoh.pypi-dependencies]
-eclipse-zenoh = "*"
-asyncio_for_robotics = "*"
+eclipse-zenoh = "==1.10.1"
+asyncio_for_robotics = "==1.5.0"
 msgspec = "*"
 
 [feature.zenoh.tasks]

@@ -6763,10 +6763,10 @@ packages:
   requires_dist:
   - attrs>=19.2.0
   requires_python: '>=3.7'
-- pypi: https://files.pythonhosted.org/packages/58/1b/2a074d4f4595bd37c3d12f1b2ad49bceef5c8cd0962cbfd97d1d39f32e1f/eclipse_zenoh-1.9.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+- pypi: https://files.pythonhosted.org/packages/b0/a2/5a54606f5202581256a8bb405e51b6d69254aa84a44e716aedae21fb2964/eclipse_zenoh-1.10.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   name: eclipse-zenoh
-  version: 1.9.0
-  sha256: 43299593891cfd648bca4b2aa00f3dca916508a49a0c9e6960902e6e867b247e
+  version: 1.10.1
+  sha256: faa4071aea57650594e8f4ea39147f791fbd6105cbd7afe15e96dc3589bd83db
   requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/59/14/9c4a444aa3459607eb6be1c6d4270a0c02a6ac89f5b628f5bc78580b0284/awscrt-0.23.4-cp311-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   name: awscrt
@@ -7377,10 +7377,10 @@ packages:
   sha256: c37b77dd528ad18a036466e856f53d8bd5912b757a775309354b4a977a069379
   requires_dist:
   - torch==2.7.0
-- pypi: https://files.pythonhosted.org/packages/ab/ca/2a41e98b723be08554d4d52c4867e6afd2a300809629dd62fc233337eb01/asyncio_for_robotics-1.4.0-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/80/07/7805a5c7b46659aa1fb7a7d10e51f7448dfa06760711f2fc607ba212b806/asyncio_for_robotics-1.5.0-py3-none-any.whl
   name: asyncio-for-robotics
-  version: 1.4.0
-  sha256: 7ab7dad61964fd8fca148c8e6f0e01ed3b51dec78768f0c2a6c0aaadcbc4f0c8
+  version: 1.5.0
+  sha256: 05795dc7620561ef0379b69cb9e7500bc20bbf2fcee6011789b6da493d002e8b
   requires_dist:
   - async-timeout ; python_full_version < '3.11'
   - exceptiongroup ; python_full_version < '3.11'

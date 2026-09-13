@@ -1,3 +1,7 @@
+__author__ = "Bach Nguyen"
+__maintainer__ = "Louis Burtz"
+__email__ = "ljburtz@jaops.com"
+
 import asyncio
 
 from asyncio_for_robotics.zenoh.session import auto_session

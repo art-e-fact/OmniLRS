@@ -1,3 +1,7 @@
+__author__ = "Bach Nguyen, Shamistan Karimov"
+__maintainer__ = "Louis Burtz"
+__email__ = "ljburtz@jaops.com"
+
 import asyncio
 
 import cv2

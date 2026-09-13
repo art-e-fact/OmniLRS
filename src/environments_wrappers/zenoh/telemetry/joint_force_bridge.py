@@ -1,3 +1,7 @@
+__author__ = "Shamistan Karimov"
+__maintainer__ = "Louis Burtz"
+__email__ = "ljburtz@jaops.com"
+
 from __future__ import annotations
 
 import logging

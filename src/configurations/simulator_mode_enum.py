@@ -1,4 +1,4 @@
-__author__ = "Aleksa Stanivuk"
+__author__ = "Aleksa Stanivuk, Bach Nguyen"
 __maintainer__ = "Louis Burtz"
 __email__ = "ljburtz@jaops.com"
 

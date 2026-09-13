@@ -1,8 +1,8 @@
-from __future__ import annotations
-
 __author__ = "Shamistan Karimov, Bach Nguyen, Elian Neppel"
 __maintainer__ = "Louis Burtz"
 __email__ = "ljburtz@jaops.com"
+
+from __future__ import annotations
 
 import json
 from typing import Any, Literal, TypeAlias, cast

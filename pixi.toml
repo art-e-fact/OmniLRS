@@ -26,6 +26,7 @@ index-strategy = "unsafe-best-match"
 python = "3.11.*"
 gdal = "*"
 libgdal = "*"
+libglu = "*"
 rdfind = "*"
 
 [feature.core.pypi-dependencies]
@@ -92,6 +93,16 @@ zenoh_largescale = "python run.py mode=Zenoh environment=largescale robot=husky"
 [feature.zenoh-client.tasks]
 zenoh_test_sub = "python scripts/zenoh/sub_camera.py"
 zenoh_test_pub = "python scripts/zenoh/pub_randomize_rocks.py"
+[feature.test-sim.dependencies]
+python = "3.11.*"
+
+[feature.test-sim.pypi-dependencies]
+pytest = "*"
+yamcs-client = "*"
+
+[feature.test-sim.tasks]
+test-ros2 = "pytest -v -s test/test_ros2_sanity.py"
+test-yamcs = "pytest -v -s test/test_yamcs_sanity.py"
 
 [environments]
 default = { features = ["core", "isaac"] }
@@ -99,3 +110,5 @@ yamcs = { features = ["core", "isaac", "yamcs"] }
 ros2 = { features = ["core", "isaac", "ros2"] }
 zenoh = { features = ["core", "isaac", "zenoh"]}
 zenoh-client = { features = ["core", "zenoh", "zenoh-client"]}
+test-sim = { features = ["test-sim"] }
+ci = { features = ["core", "isaac", "ros2", "yamcs"] }

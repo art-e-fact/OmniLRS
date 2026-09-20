@@ -1,33 +1,16 @@
 name: Zenoh
-sensors:
-  camera:
-    base_keyexpr: "OmniLRS/{robot_name}/camera"
-    resolution: "high" # "low" or "high"
-    publish_period_s: 0.0333 # 30 hz
+pub_log_every_n: 50
+sub_log_every_n: 5000
 
-  imu:
-    keyexpr: "OmniLRS/{robot_name}/imu"
-    publish_period_s: 0.02
+keyexprs:
 
-  joint_force:
-    keyexpr: "OmniLRS/{robot_name}/joint_telemetry"
-    wire_format: "json" # "json" or "msgspec" (MessagePack)
-    publish_period_s: 0.1
-    init_retry_s: 0.5
-    not_ready_log_period_s: 1.0
-    keep_history: False
-    history_len: 200
-    contact_force_threshold_n: 0.0
+  # multi-instance channels: child topics will be appended (sensor name from robot.yaml, i.e: high_res, low_res, ..)
+  camera:            "OmniLRS/{robot_name}/camera"   # -> OmniLRS/husky/camera/left_color
+  imu:               "OmniLRS/{robot_name}/imu"      # -> OmniLRS/husky/imu/adxl6090
 
-controller:
-    cmd_keyexpr: "OmniLRS/{robot_name}/joint_cmd"
-    wire_format: "json" # "json" or "msgspec" (MessagePack)
-
-misc:
-  sim:
-    is_running_keyexpr: "OmniLRS/sim/is_running"
-    gt_pose_keyexpr: "OmniLRS/{robot_name}/gt_pose"
-
-  rocks:
-    randomize:
-      keyexpr: "OmniLRS/Terrain/RandomizeRocks"
+  # singletons: full keys, nothing appended
+  joint_telemetry:   "OmniLRS/{robot_name}/joint_telemetry"
+  joint_commands:    "OmniLRS/{robot_name}/joint_cmd"
+  ground_truth_pose: "OmniLRS/{robot_name}/gt_pose"
+  is_sim_running:    "OmniLRS/sim/is_running"
+  randomize_rocks:   "OmniLRS/Terrain/RandomizeRocks"

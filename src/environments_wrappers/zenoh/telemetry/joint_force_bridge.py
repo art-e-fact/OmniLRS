@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 __author__ = "Shamistan Karimov"
 __maintainer__ = "Louis Burtz"
 __email__ = "ljburtz@jaops.com"
-
-from __future__ import annotations
 
 import logging
 import time
@@ -17,32 +17,28 @@ logger = logging.getLogger(__name__)
 class JointForceBridge:
     def __init__(
         self,
+        robot_cfg: dict,
         zenoh_cfg: dict,
         RM: RobotManager,
-        robot_name: str = "husky",
-        robot_root_prim: str = "/Robots/husky",
-        publish_period_s: float = 0.1,
-        logger=logger,
-        init_retry_s: float = 0.5,
-        not_ready_log_period_s: float = 1.0,
-        keep_history: bool = False,
-        history_len: int = 200,
-        contact_force_threshold_n: float = 0.0,
+        robot_root_prim: str,
     ):
+        self.robot_cfg = robot_cfg
         self.zenoh_cfg = zenoh_cfg
         self.RM = RM
-        self.robot_name = robot_name
+        self.robot_name = self.robot_cfg["robot_name"]
         self.robot_root_prim = robot_root_prim
 
-        self.publish_period_s = self.zenoh_cfg.get("publish_period_s", float(publish_period_s))
+        self.publish_period_s = self.robot_cfg["zenoh"]["joint_force"]["publish_period_s"]
 
         self.log = logger.info
-        self.init_retry_s = self.zenoh_cfg.get("init_retry_s", float(init_retry_s))
-        self.not_ready_log_period_s = self.zenoh_cfg.get("not_ready_log_period_s", float(not_ready_log_period_s))
+        self.init_retry_s = self.robot_cfg["zenoh"]["joint_force"]["init_retry_s"]
+        self.not_ready_log_period_s = self.robot_cfg["zenoh"]["joint_force"]["not_ready_log_period_s"]
 
-        self.keep_history = self.zenoh_cfg.get("keep_history", bool(keep_history))
-        self.history_len = self.zenoh_cfg.get("history_len", int(max(1, history_len)))
+        self.keep_history = self.robot_cfg["zenoh"]["joint_force"]["keep_history"]
+        self.history_len = self.robot_cfg["zenoh"]["joint_force"]["history_len"]
 
+        self.wire_format = self.robot_cfg["zenoh"]["joint_force"]["wire_format"]
+        
         self._inited = False
         self._t_last_publish = 0.0
         self._t_last_init_try = 0.0
@@ -67,10 +63,10 @@ class JointForceBridge:
     def make_transports(self) -> None:
         spec = {
             "type": "zenoh",
-            "keyexpr": self.zenoh_cfg.get("keyexpr", "OmniLRS/{robot_name}/joint_telemetry").format(
+            "keyexpr": self.zenoh_cfg["keyexprs"]["joint_telemetry"].format(
                 robot_name=self.robot_name
             ),
-            "wire_format": self.zenoh_cfg.get("wire_format", "json"),
+            "wire_format": self.wire_format,
         }
         self.transports = make_transports([spec])
 

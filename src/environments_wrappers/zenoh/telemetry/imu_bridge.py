@@ -12,10 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class IMUBridge:
-    def __init__(self, zenoh_cfg: dict, RM: RobotManager, publish_period_s: float = 0.02):
+    def __init__(self, robot_cfg: dict, zenoh_cfg: dict, RM: RobotManager):
+        self.robot_cfg = robot_cfg
         self.zenoh_cfg = zenoh_cfg
 
-        self.publish_period_s = self.zenoh_cfg.get("publish_period_s", float(publish_period_s))
+        self.robot_name = self.robot_cfg["robot_name"]
+        
+        self.publish_period_s = self.robot_cfg["zenoh"]["imu"]["publish_period_s"]
+
+        self.wire_format = self.robot_cfg["zenoh"]["imu"]["wire_format"]
 
         self.RM = RM
 
@@ -30,9 +35,10 @@ class IMUBridge:
     def make_transports(self):
         spec = {
             "type": "zenoh",
-            "keyexpr": self.zenoh_cfg.get("keyexpr", "OmniLRS/{robot_name}/imu").format(
-                robot_name=self.RM.robot_parameters.robot_name
+            "keyexpr": self.zenoh_cfg["keyexprs"]["imu"].format(
+                robot_name=self.robot_name
             ),
+            "wire_format": self.wire_format,
         }
         self.transports = make_transports([spec])
 

@@ -29,45 +29,36 @@ class Zenoh_RobotManager:
 
         robot = RM_conf["parameters"]
 
-        robot_name = f"{robot['robot_name']}"
+        robot_name = robot['robot_name']
         robot_path = self.RM_.robots_root + "/" + robot_name
 
         ### BEGIN TELEMETRY ###
 
         ## Camera Telemetry
-        camera_cfg = robot.get("camera", None)  # camera_cfg optional
-        camera_zenoh_cfg = zenoh_conf.get("sensors", {}).get("camera", {})
-        self.camera_bridge = CameraBridge(camera_cfg, camera_zenoh_cfg, self.RM_)
+        self.camera_bridge = CameraBridge(robot, zenoh_conf, self.RM_)
 
         ## IMU Telemetry
-        imu_zenoh_cfg = zenoh_conf.get("sensors", {}).get("imu", {})
-        self.imu_bridge = IMUBridge(imu_zenoh_cfg, self.RM_)
+        self.imu_bridge = IMUBridge(robot, zenoh_conf, self.RM_)
 
         ## Joint Force Telemetry
-        joint_zenoh_cfg = zenoh_conf.get("sensors", {}).get("joint_force", {})
         self.joint_bridge = JointForceBridge(
-            joint_zenoh_cfg,
+            robot,
+            zenoh_conf,
             RM=self.RM_,
-            robot_name=robot_name,
             robot_root_prim=robot_path,
         )
         ### END TELEMETRY ###
 
         gt_pub = ZenohPubTransport(
-            keyexpr=zenoh_conf.get("misc", {})
-            .get("sim", {})
-            .get("gt_pose_keyexpr", "OmniLRS/{robot_name}/gt_pose")
-            .format(robot_name=robot_name)
+            keyexpr=zenoh_conf["keyexprs"]["ground_truth_pose"].format(robot_name=robot_name)
         )
         self.gt = gt_pub
         self.transports.append(gt_pub)
 
         self.cmd_receiver = ZenohCommandReceiver(
             RM=self.RM_,
-            keyexpr=zenoh_conf.get("controller", {})
-            .get("cmd_keyexpr", "OmniLRS/{robot_name}/joint_cmd")
-            .format(robot_name=robot_name),
-            wire_format=zenoh_conf.get("controller", {}).get("wire_format", "json"),
+            keyexpr=zenoh_conf["keyexprs"]["joint_commands"].format(robot_name=robot_name),
+            wire_format=robot["zenoh"]["controller"]["wire_format"],
         )
 
         self.transports_inited = False

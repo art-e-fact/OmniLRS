@@ -13,14 +13,18 @@ logger = logging.getLogger(__name__)
 
 
 class CameraBridge:
-    def __init__(self, camera_cfg: Optional[dict], zenoh_cfg: dict, RM: RobotManager, publish_period_s: float = 0.0333):
-        self.camera_cfg = camera_cfg
+    def __init__(self, robot_cfg: dict, zenoh_cfg: dict, RM: RobotManager):
+        self.robot_cfg = robot_cfg
         self.zenoh_cfg = zenoh_cfg
 
-        self.resolution = self.zenoh_cfg.get("resolution", None)
-        self.publish_period_s = self.zenoh_cfg.get("publish_period_s", float(publish_period_s))
+        self.robot_name = self.robot_cfg["robot_name"]
 
-        self.base_expr_template = self.zenoh_cfg.get("base_keyexpr", "OmniLRS/{robot_name}/camera")
+        self.camera_cfg = self.robot_cfg["camera"]
+        self.publish_period_s = self.robot_cfg["zenoh"]["camera"]["publish_period_s"]
+
+        self.wire_format = self.robot_cfg["zenoh"]["camera"]["wire_format"]
+
+        self.keyexpr_template = self.zenoh_cfg["keyexprs"]["camera"] 
 
         self.RM = RM
 
@@ -32,21 +36,20 @@ class CameraBridge:
         self._transports_started = False
         self._t_last_publish = 0.0
 
-    def build_camera_keyexpr(self, camera_name: str) -> str:
-        return self.base_expr_template.format(robot_name=self.RM.robot_parameters.robot_name) + f"/{camera_name}"
+    def build_camera_keyexpr(self, camera_name: str, resolution: str) -> str:
+        return self.keyexpr_template.format(robot_name=self.robot_name) + f"/{camera_name}/{resolution}"
 
     def make_transports(self):
         if self.camera_cfg:
-            if isinstance(self.camera_cfg, list):
-                specs = []
-                for camera in self.camera_cfg:
-                    specs.append({"type": "zenoh", "keyexpr": self.build_camera_keyexpr(camera["name"])})
-
-                self.transports = make_transports(specs)
-
-            else:
-                spec = {"type": "zenoh", "keyexpr": self.build_camera_keyexpr(self.camera_cfg["name"])}
-                self.transports = make_transports([spec])
+            resolutions = self.camera_cfg["resolutions"]
+            specs = []
+            for res in resolutions:
+                specs.append({
+                    "type": "zenoh", 
+                    "keyexpr": self.build_camera_keyexpr(self.camera_cfg["name"], res),
+                    "wire_format": self.wire_format
+                })
+            self.transports = make_transports(specs)
 
     def maybe_initialize(self):
         if self._inited:
@@ -72,7 +75,7 @@ class CameraBridge:
         """
         Publish current frame from each camera
         """
-        if not self._inited or not self.camera_cfg or self.resolution is None:
+        if not self._inited or not self.camera_cfg:
             return False
 
         now = time.time()
@@ -81,10 +84,8 @@ class CameraBridge:
         self._t_last_publish = now
 
         for i, transport in enumerate(self.transports):
-            if len(self.transports) > 1:
-                frame = self.RM.robot.get_rgba_camera_view_by_idx(i, self.resolution)
-            else:
-                frame = self.RM.robot.get_rgba_camera_view(self.resolution)
+            resolution = transport.keyexpr.split('/')[-1]
+            frame = self.RM.robot.get_rgba_camera_view(resolution)
 
             if frame.size != 0:
                 transport.publish_array(frame)

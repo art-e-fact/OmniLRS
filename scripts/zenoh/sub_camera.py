@@ -12,7 +12,7 @@ from environments_wrappers.zenoh.transport.zenoh_pub import WireNDArray
 
 
 async def main():
-    sub = Sub("OmniLRS/husky/camera/cam_color")
+    sub = Sub("OmniLRS/husky/camera/cam_color/high")
 
     try:
         async for sample in sub.listen_reliable():

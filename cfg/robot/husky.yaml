@@ -30,3 +30,19 @@ robots_settings:
         high: [1280, 720]
     imu_sensor_path: "/Robots/husky/d455/RSD455/Imu_Sensor"
     turn_speed_coef: 6.5
+    zenoh:
+      camera:
+        publish_period_s: 0.0333 # 30 hz
+        wire_format: "msgspec"
+      imu:
+        publish_period_s: 0.02
+        wire_format: "json"
+      joint_force:
+        publish_period_s: 0.1
+        wire_format: "json"
+        init_retry_s: 0.5
+        not_ready_log_period_s: 1.0
+        keep_history: False
+        history_len: 200
+      controller:
+        wire_format: "json"

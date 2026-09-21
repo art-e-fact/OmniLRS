@@ -27,13 +27,11 @@ class Zenoh_BaseManager:
 
         self.modifications: List[Tuple[callable, dict]] = []
 
-        self.rocks_randomize_keyexpr = zenoh_cfg['keyexprs']['randomize_rocks']
+        self.rocks_randomize_keyexpr = zenoh_cfg["keyexprs"]["randomize_rocks"]
 
         self.transports: List[ZenohPubTransport] = []
 
-        self.sim_running_pub = ZenohPubTransport(
-            keyexpr=zenoh_cfg['keyexprs']['is_sim_running']
-        )
+        self.sim_running_pub = ZenohPubTransport(keyexpr=zenoh_cfg["keyexprs"]["is_sim_running"])
         self.transports.append(self.sim_running_pub)
 
         self.transports_inited = False

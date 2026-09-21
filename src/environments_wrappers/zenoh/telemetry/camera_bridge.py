@@ -24,7 +24,7 @@ class CameraBridge:
 
         self.wire_format = self.robot_cfg["zenoh"]["camera"]["wire_format"]
 
-        self.keyexpr_template = self.zenoh_cfg["keyexprs"]["camera"] 
+        self.keyexpr_template = self.zenoh_cfg["keyexprs"]["camera"]
 
         self.RM = RM
 
@@ -44,11 +44,13 @@ class CameraBridge:
             resolutions = self.camera_cfg["resolutions"]
             specs = []
             for res in resolutions:
-                specs.append({
-                    "type": "zenoh", 
-                    "keyexpr": self.build_camera_keyexpr(self.camera_cfg["name"], res),
-                    "wire_format": self.wire_format
-                })
+                specs.append(
+                    {
+                        "type": "zenoh",
+                        "keyexpr": self.build_camera_keyexpr(self.camera_cfg["name"], res),
+                        "wire_format": self.wire_format,
+                    }
+                )
             self.transports = make_transports(specs)
 
     def maybe_initialize(self):
@@ -84,7 +86,7 @@ class CameraBridge:
         self._t_last_publish = now
 
         for i, transport in enumerate(self.transports):
-            resolution = transport.keyexpr.split('/')[-1]
+            resolution = transport.keyexpr.split("/")[-1]
             frame = self.RM.robot.get_rgba_camera_view(resolution)
 
             if frame.size != 0:

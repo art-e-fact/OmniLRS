@@ -29,7 +29,7 @@ class Zenoh_RobotManager:
 
         robot = RM_conf["parameters"]
 
-        robot_name = robot['robot_name']
+        robot_name = robot["robot_name"]
         robot_path = self.RM_.robots_root + "/" + robot_name
 
         ### BEGIN TELEMETRY ###
@@ -49,9 +49,7 @@ class Zenoh_RobotManager:
         )
         ### END TELEMETRY ###
 
-        gt_pub = ZenohPubTransport(
-            keyexpr=zenoh_conf["keyexprs"]["ground_truth_pose"].format(robot_name=robot_name)
-        )
+        gt_pub = ZenohPubTransport(keyexpr=zenoh_conf["keyexprs"]["ground_truth_pose"].format(robot_name=robot_name))
         self.gt = gt_pub
         self.transports.append(gt_pub)
 

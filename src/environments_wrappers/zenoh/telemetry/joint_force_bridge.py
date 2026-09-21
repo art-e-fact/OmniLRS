@@ -38,7 +38,7 @@ class JointForceBridge:
         self.history_len = self.robot_cfg["zenoh"]["joint_force"]["history_len"]
 
         self.wire_format = self.robot_cfg["zenoh"]["joint_force"]["wire_format"]
-        
+
         self._inited = False
         self._t_last_publish = 0.0
         self._t_last_init_try = 0.0
@@ -63,9 +63,7 @@ class JointForceBridge:
     def make_transports(self) -> None:
         spec = {
             "type": "zenoh",
-            "keyexpr": self.zenoh_cfg["keyexprs"]["joint_telemetry"].format(
-                robot_name=self.robot_name
-            ),
+            "keyexpr": self.zenoh_cfg["keyexprs"]["joint_telemetry"].format(robot_name=self.robot_name),
             "wire_format": self.wire_format,
         }
         self.transports = make_transports([spec])

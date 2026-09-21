@@ -17,7 +17,7 @@ class IMUBridge:
         self.zenoh_cfg = zenoh_cfg
 
         self.robot_name = self.robot_cfg["robot_name"]
-        
+
         self.publish_period_s = self.robot_cfg["zenoh"]["imu"]["publish_period_s"]
 
         self.wire_format = self.robot_cfg["zenoh"]["imu"]["wire_format"]
@@ -35,9 +35,7 @@ class IMUBridge:
     def make_transports(self):
         spec = {
             "type": "zenoh",
-            "keyexpr": self.zenoh_cfg["keyexprs"]["imu"].format(
-                robot_name=self.robot_name
-            ),
+            "keyexpr": self.zenoh_cfg["keyexprs"]["imu"].format(robot_name=self.robot_name),
             "wire_format": self.wire_format,
         }
         self.transports = make_transports([spec])

@@ -143,6 +143,7 @@ class Zenoh_SimulationManager:
 
         try:
             async for sample in sub.listen_reliable():
+                logger.info("[ZenohSimulationManager] received cmd: randomize_rocks")
                 self.Zenoh_EC.randomize_rocks(sample)
         finally:
             sub.close()

@@ -22,15 +22,16 @@ class ZenohCommandReceiver:
     def __init__(
         self,
         RM: RobotManager,
-        keyexpr: str = "joint_cmd",
-        wire_format: str = "json",
-        logger=logger,
-        log_every_n: int = 5000,
+        keyexpr: str,
+        wire_format: str,
+        is_logging: bool,
+        log_every_n: int,
     ):
         self.RM = RM
         self.keyexpr = keyexpr
         self.wire_format: WireFormat = normalize_wire_format(wire_format)
         self.log = logger.info
+        self.is_logging = is_logging
         self.log_every_n = int(max(1, log_every_n))
 
         self._task: asyncio.Task | None = None
@@ -111,7 +112,7 @@ class ZenohCommandReceiver:
 
                 self._count += 1
 
-                if self._count == 1 or self._count % self.log_every_n == 0:
+                if self.is_logging and self._count == 1 or self._count % self.log_every_n == 0:
                     self.log(
                         "[ZenohCommandReceiver] received cmd "
                         f"#{self._count}: "

@@ -8,7 +8,7 @@ from asyncio_for_robotics.zenoh.session import auto_session
 
 
 async def main():
-    pub = auto_session().declare_publisher("OmniLRS/Terrain/RandomizeRocks")
+    pub = auto_session().declare_publisher("OmniLRS/terrain/randomize_rocks")
 
     try:
         pub.put("10")

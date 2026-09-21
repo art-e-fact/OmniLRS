@@ -6,6 +6,7 @@ __email__ = "ljburtz@jaops.com"
 
 import logging
 from typing import Any, AsyncGenerator, Dict, Optional
+import time
 
 import asyncio_for_robotics.zenoh as afor
 import msgspec
@@ -34,12 +35,14 @@ class WireNDArray(msgspec.Struct, array_like=True, kw_only=True):
 class ZenohPubTransport:
     def __init__(
         self,
-        keyexpr: str = "OmniLRS/Husky/**",
-        wire_format: str = "json",
-        log_every_n: int = 50,
+        keyexpr: str,
+        wire_format: str,
+        is_logging: bool,
+        log_every_n: int,
     ):
         self.keyexpr = keyexpr
         self.wire_format: WireFormat = normalize_wire_format(wire_format)
+        self.is_logging = is_logging
         self.log_every_n = int(max(1, log_every_n))
 
         self._session = None
@@ -50,7 +53,6 @@ class ZenohPubTransport:
         self._array_decoder = msgspec.msgpack.Decoder(WireNDArray)
 
         self._publish_count = 0
-        self._last_publish_t = 0.0
 
         logger.info(
             "ZenohPubTransport created: keyexpr=%s wire_format=%s",
@@ -79,7 +81,17 @@ class ZenohPubTransport:
         return True
 
     def _log_publish(self, kind: str, payload_len: int, extra: str = "") -> None:
-        pass
+        self._publish_count += 1
+
+        if self._publish_count == 1 or self._publish_count % self.log_every_n == 0:
+            logger.info(
+                "published %s #%d on %s payload_bytes=%d %s",
+                kind,
+                self._publish_count,
+                self.keyexpr,
+                payload_len,
+                extra,
+            )
 
     def publish(self, frame: Dict[str, Any]) -> None:
         if not self._check_pub("publish"):
@@ -88,7 +100,8 @@ class ZenohPubTransport:
         try:
             payload = encode_payload(frame, self.wire_format)
             self._pub.put(payload)
-            self._log_publish(self.wire_format, len(payload), extra=f"keys={list(frame.keys())}")
+            if self.is_logging:
+                self._log_publish(self.wire_format, len(payload), extra=f"keys={list(frame.keys())}")
 
         except Exception:
             logger.exception("failed to publish %s on %s", self.wire_format, self.keyexpr)
@@ -100,11 +113,12 @@ class ZenohPubTransport:
         try:
             payload = self._array_encoder.encode(WireNDArray.pack(array))
             self._pub.put(payload)
-            self._log_publish(
-                "ndarray",
-                len(payload),
-                extra=f"shape={array.shape} dtype={array.dtype}",
-            )
+            if self.is_logging:
+                self._log_publish(
+                    "ndarray",
+                    len(payload),
+                    extra=f"shape={array.shape} dtype={array.dtype}",
+                )
 
         except Exception:
             logger.exception("failed to publish ndarray on %s", self.keyexpr)

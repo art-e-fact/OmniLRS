@@ -28,16 +28,20 @@ class JointForceBridge:
         self.robot_name = self.robot_cfg["robot_name"]
         self.robot_root_prim = robot_root_prim
 
-        self.publish_period_s = self.robot_cfg["zenoh"]["joint_force"]["publish_period_s"]
+        self.publish_period_s = self.robot_cfg["zenoh"]["joint_telemetry"]["publish_period_s"]
 
         self.log = logger.info
-        self.init_retry_s = self.robot_cfg["zenoh"]["joint_force"]["init_retry_s"]
-        self.not_ready_log_period_s = self.robot_cfg["zenoh"]["joint_force"]["not_ready_log_period_s"]
+        self.init_retry_s = self.robot_cfg["zenoh"]["joint_telemetry"]["init_retry_s"]
+        self.not_ready_log_period_s = self.robot_cfg["zenoh"]["joint_telemetry"]["not_ready_log_period_s"]
 
-        self.keep_history = self.robot_cfg["zenoh"]["joint_force"]["keep_history"]
-        self.history_len = self.robot_cfg["zenoh"]["joint_force"]["history_len"]
+        self.keep_history = self.robot_cfg["zenoh"]["joint_telemetry"]["keep_history"]
+        self.history_len = self.robot_cfg["zenoh"]["joint_telemetry"]["history_len"]
 
-        self.wire_format = self.robot_cfg["zenoh"]["joint_force"]["wire_format"]
+        self.wire_format = self.robot_cfg["zenoh"]["joint_telemetry"]["wire_format"]
+
+        self.is_logging = self.robot_cfg["zenoh"]["joint_telemetry"]["is_logging"]
+        
+        self.log_every_n = self.zenoh_cfg["pub_log_every_n"]
 
         self._inited = False
         self._t_last_publish = 0.0
@@ -65,6 +69,8 @@ class JointForceBridge:
             "type": "zenoh",
             "keyexpr": self.zenoh_cfg["keyexprs"]["joint_telemetry"].format(robot_name=self.robot_name),
             "wire_format": self.wire_format,
+            "is_logging": self.is_logging,
+            "log_every_n": self.log_every_n,
         }
         self.transports = make_transports([spec])
 

@@ -36,8 +36,10 @@ def make_transports(
         if t == "zenoh":
             out.append(
                 ZenohPubTransport(
-                    keyexpr=s.get("keyexpr", "joint_telemetry"),
-                    wire_format=s.get("wire_format", "json"),
+                    keyexpr= s["keyexpr"],
+                    wire_format= s["wire_format"],
+                    is_logging= s["is_logging"],
+                    log_every_n= s["log_every_n"]
                 )
             )
         else:

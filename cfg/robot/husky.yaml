@@ -34,15 +34,28 @@ robots_settings:
       camera:
         publish_period_s: 0.0333 # 30 hz
         wire_format: "msgspec"
+        is_logging: True
       imu:
         publish_period_s: 0.02
         wire_format: "json"
-      joint_force:
+        is_logging: True
+      joint_telemetry:
         publish_period_s: 0.1
         wire_format: "json"
         init_retry_s: 0.5
         not_ready_log_period_s: 1.0
         keep_history: False
         history_len: 200
-      controller:
+        is_logging: True
+      joint_commands:
         wire_format: "json"
+        is_logging: True
+      ground_truth_pose:
+        wire_format: "json"
+        is_logging: True
+      is_sim_running:
+        wire_format: "json"
+        is_logging: True
+      randomize_rocks:
+        wire_format: "json"
+        is_logging: True

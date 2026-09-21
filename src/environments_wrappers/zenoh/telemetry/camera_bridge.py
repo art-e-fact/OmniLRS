@@ -24,6 +24,10 @@ class CameraBridge:
 
         self.wire_format = self.robot_cfg["zenoh"]["camera"]["wire_format"]
 
+        self.is_logging = self.robot_cfg["zenoh"]["camera"]["is_logging"]
+
+        self.log_every_n = self.zenoh_cfg["pub_log_every_n"]
+
         self.keyexpr_template = self.zenoh_cfg["keyexprs"]["camera"]
 
         self.RM = RM
@@ -49,6 +53,8 @@ class CameraBridge:
                         "type": "zenoh",
                         "keyexpr": self.build_camera_keyexpr(self.camera_cfg["name"], res),
                         "wire_format": self.wire_format,
+                        "is_logging": self.is_logging,
+                        "log_every_n": self.log_every_n,
                     }
                 )
             self.transports = make_transports(specs)

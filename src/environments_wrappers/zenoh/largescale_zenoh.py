@@ -16,6 +16,7 @@ from src.environments_wrappers.zenoh.base_wrapper_zenoh import Zenoh_BaseManager
 
 logger = logging.getLogger(__name__)
 
+
 class Zenoh_LargeScaleManager(Zenoh_BaseManager):
     """
     Wrapper for managing the environment in Zenoh mode
@@ -49,7 +50,7 @@ class Zenoh_LargeScaleManager(Zenoh_BaseManager):
         self.LC.load()
 
         self.zenoh_cfg = zenoh_cfg
-                
+
         self.rocks_randomize_keyexpr = self.zenoh_cfg["keyexprs"]["randomize_rocks"]
 
         self.log = logger.info
@@ -77,7 +78,9 @@ class Zenoh_LargeScaleManager(Zenoh_BaseManager):
 
         self.subs_inited = True
 
-        self.log(f"[ZenohLargeScaleManager] listening: {self.rocks_randomize_keyexpr} wire_format={self.zenoh_cfg['default_wire_format']}")
+        self.log(
+            f"[ZenohLargeScaleManager] listening: {self.rocks_randomize_keyexpr} wire_format={self.zenoh_cfg['default_wire_format']}"
+        )
 
     async def _randomize_rocks_sub(self) -> None:
         sub = afor.Sub(self.rocks_randomize_keyexpr)
@@ -85,7 +88,7 @@ class Zenoh_LargeScaleManager(Zenoh_BaseManager):
         try:
             async for sample in sub.listen_reliable():
                 self.log("[ZenohLargeScaleManager] received cmd: randomize_rocks")
-                
+
                 data = int(sample.payload.to_string())
                 assert data > 0, "The number of rocks must be greater than 0."
                 self.modifications.append([self.LC.randomize_rocks, {"num": data}])

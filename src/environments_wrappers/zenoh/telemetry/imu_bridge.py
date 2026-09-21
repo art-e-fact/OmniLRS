@@ -26,7 +26,7 @@ class IMUBridge:
         )
 
         self.is_logging = self.robot_cfg["zenoh"]["imu"]["is_logging"]
-        
+
         self.log_every_n = self.zenoh_cfg["pub_log_every_n"]
 
         self.RM = RM

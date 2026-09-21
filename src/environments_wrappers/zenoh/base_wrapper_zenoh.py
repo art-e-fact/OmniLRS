@@ -33,7 +33,7 @@ class Zenoh_BaseManager:
             keyexpr=zenoh_cfg["keyexprs"]["is_sim_running"],
             wire_format="json",
             is_logging=True,
-            log_every_n= zenoh_cfg["pub_log_every_n"]
+            log_every_n=zenoh_cfg["pub_log_every_n"],
         )
         self.publishers.append(self.sim_running_pub)
 

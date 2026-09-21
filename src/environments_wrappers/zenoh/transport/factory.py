@@ -36,10 +36,10 @@ def make_transports(
         if t == "zenoh":
             out.append(
                 ZenohPubTransport(
-                    keyexpr= s["keyexpr"],
-                    wire_format= s["wire_format"],
-                    is_logging= s["is_logging"],
-                    log_every_n= s["log_every_n"]
+                    keyexpr=s["keyexpr"],
+                    wire_format=s["wire_format"],
+                    is_logging=s["is_logging"],
+                    log_every_n=s["log_every_n"],
                 )
             )
         else:

@@ -16,6 +16,7 @@ from src.environments_wrappers.zenoh.base_wrapper_zenoh import Zenoh_BaseManager
 
 logger = logging.getLogger(__name__)
 
+
 class Zenoh_LunaryardManager(Zenoh_BaseManager):
     """
     Wrapper for managing environment in Zenoh mode
@@ -68,7 +69,9 @@ class Zenoh_LunaryardManager(Zenoh_BaseManager):
 
         self.subs_inited = True
 
-        self.log(f"[ZenohLunaryardManager] listening: {self.rocks_randomize_keyexpr} wire_format={self.zenoh_cfg['default_wire_format']}")
+        self.log(
+            f"[ZenohLunaryardManager] listening: {self.rocks_randomize_keyexpr} wire_format={self.zenoh_cfg['default_wire_format']}"
+        )
 
     async def _randomize_rocks_sub(self) -> None:
         sub = afor.Sub(self.rocks_randomize_keyexpr)
@@ -84,7 +87,7 @@ class Zenoh_LunaryardManager(Zenoh_BaseManager):
 
         finally:
             sub.close()
-    
+
     def periodic_update(self, dt: float) -> None:
         """
         Updates the lab.

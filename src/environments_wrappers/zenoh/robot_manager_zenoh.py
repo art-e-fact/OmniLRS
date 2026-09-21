@@ -57,8 +57,8 @@ class Zenoh_RobotManager:
                 "wire_format",
                 zenoh_conf["default_wire_format"],
             ),
-            is_logging= robot["zenoh"]["joint_commands"]["is_logging"],
-            log_every_n= zenoh_conf["sub_log_every_n"]
+            is_logging=robot["zenoh"]["joint_commands"]["is_logging"],
+            log_every_n=zenoh_conf["sub_log_every_n"],
         )
 
         ## Ground Truth
@@ -68,8 +68,8 @@ class Zenoh_RobotManager:
                 "wire_format",
                 zenoh_conf["default_wire_format"],
             ),
-            is_logging= robot["zenoh"]["ground_truth_pose"]["is_logging"],
-            log_every_n= zenoh_conf["pub_log_every_n"]
+            is_logging=robot["zenoh"]["ground_truth_pose"]["is_logging"],
+            log_every_n=zenoh_conf["pub_log_every_n"],
         )
         self.gt = gt_pub
         self.publishers.append(gt_pub)

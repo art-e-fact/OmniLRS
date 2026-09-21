@@ -150,9 +150,9 @@ class Zenoh_SimulationManager:
 
         while self.simulation_app.is_running():
             self.rate.reset()
-            
+
             did_reset = False
-    
+
             if self.world.is_playing():
                 if self.world.current_time_step_index == 0:
                     self.world.reset()
@@ -161,7 +161,7 @@ class Zenoh_SimulationManager:
                     self.Zenoh_RM.invalidate_articulation_api()
                     self.Zenoh_RM.reset_robot()
                     self.Zenoh_RM.apply_modifications()
-    
+
                 if not did_reset:
                     # Must happen before periodic_update(), because LargeScale calls robot.get_pose().
                     self.Zenoh_RM.update_articulation_api()
@@ -176,15 +176,15 @@ class Zenoh_SimulationManager:
                     if self.enable_deformation:
                         if self.world.current_time_step_index >= (self.deform_delay * self.world.get_physics_dt()):
                             self.Zenoh_EC.LC.deform_terrain()
-    
+
             if self.Zenoh_EC.pubs_inited:
                 self.Zenoh_EC.pub_sim_is_running(True)
-    
+
             if self.Zenoh_RM.pubs_inited and self.world.is_playing() and not did_reset:
                 self.Zenoh_RM.apply_modifications()
                 self.Zenoh_RM.publish_telemetry()
                 self.Zenoh_RM.publish_gt()
-    
+
             self.rate.sleep()
 
             self.simulation_app.update()

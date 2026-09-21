@@ -43,7 +43,7 @@ class JointForceBridge:
         )
 
         self.is_logging = self.robot_cfg["zenoh"]["joint_telemetry"]["is_logging"]
-        
+
         self.log_every_n = self.zenoh_cfg["pub_log_every_n"]
 
         self._inited = False

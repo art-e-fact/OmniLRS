@@ -1,6 +1,4 @@
 name: Zenoh
-pub_log_every_n: 50
-sub_log_every_n: 5000
 
 keyexprs:
 
@@ -13,4 +11,4 @@ keyexprs:
   joint_commands:    "OmniLRS/{robot_name}/joint_cmd"
   ground_truth_pose: "OmniLRS/{robot_name}/gt_pose"
   is_sim_running:    "OmniLRS/sim/is_running"
-  randomize_rocks:   "OmniLRS/Terrain/RandomizeRocks"
+  randomize_rocks:   "OmniLRS/terrain/randomize_rocks"

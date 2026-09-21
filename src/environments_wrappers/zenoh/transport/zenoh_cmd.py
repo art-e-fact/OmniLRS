@@ -112,7 +112,7 @@ class ZenohCommandReceiver:
 
                 self._count += 1
 
-                if self.is_logging and self._count == 1 or self._count % self.log_every_n == 0:
+                if self.is_logging and (self._count == 1 or self._count % self.log_every_n == 0):
                     self.log(
                         "[ZenohCommandReceiver] received cmd "
                         f"#{self._count}: "

@@ -24,7 +24,7 @@ class Zenoh_RobotManager:
 
         self.modifications: List[Tuple[Callable, dict]] = []
 
-        self.transports: List[ZenohPubTransport] = []
+        self.publishers: List[ZenohPubTransport] = []
         self.cams: List[ZenohPubTransport] = []
 
         robot = RM_conf["parameters"]
@@ -72,9 +72,24 @@ class Zenoh_RobotManager:
             log_every_n= zenoh_conf["pub_log_every_n"]
         )
         self.gt = gt_pub
-        self.transports.append(gt_pub)
+        self.publishers.append(gt_pub)
 
-        self.transports_inited = False
+        self.pubs_inited = False
+
+    def start_publishing(self) -> None:
+        """
+        Start publishers.
+        """
+        for pub in self.publishers:
+            pub.start()
+
+        self.pubs_inited = True
+
+    def start_listening(self) -> None:
+        """
+        Start subscribers.
+        """
+        self.cmd_receiver.start()
 
     def reset(self) -> None:
         """
@@ -135,11 +150,8 @@ class Zenoh_RobotManager:
         robot.update_articulation_api()
         return True
 
-    def update_cmd(self) -> None:
-        self.cmd_receiver.start()
-
     def publish_gt(self) -> None:
-        if self.transports_inited:
+        if self.pubs_inited:
             pos, quat = self.RM_.robot.get_pose()
 
             gt = {
@@ -157,8 +169,8 @@ class Zenoh_RobotManager:
             self.gt.publish(gt)
 
     def close(self) -> None:
-        for t in self.transports:
-            t.close()
+        for pub in self.publishers:
+            pub.close()
 
         self.camera_bridge.close()
         self.imu_bridge.close()

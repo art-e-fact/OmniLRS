@@ -27,9 +27,7 @@ class Zenoh_BaseManager:
 
         self.modifications: List[Tuple[callable, dict]] = []
 
-        self.rocks_randomize_keyexpr = zenoh_cfg["keyexprs"]["randomize_rocks"]
-
-        self.transports: List[ZenohPubTransport] = []
+        self.publishers: List[ZenohPubTransport] = []
 
         self.sim_running_pub = ZenohPubTransport(
             keyexpr=zenoh_cfg["keyexprs"]["is_sim_running"],
@@ -37,9 +35,27 @@ class Zenoh_BaseManager:
             is_logging=True,
             log_every_n= zenoh_cfg["pub_log_every_n"]
         )
-        self.transports.append(self.sim_running_pub)
+        self.publishers.append(self.sim_running_pub)
 
-        self.transports_inited = False
+        self.pubs_inited = False
+        self.subs_inited = False
+
+    def start_publishing(self) -> None:
+        """
+        Start publishers.
+        """
+        for pub in self.publishers:
+            pub.start()
+
+        self.pubs_inited = True
+
+    def start_listening(self) -> None:
+        """
+        Start listeners.
+
+        Override this method in child zenoh environments that need zenoh subscribers.
+        """
+        pass
 
     def periodic_update(self, dt: float) -> None:
         """
@@ -78,9 +94,9 @@ class Zenoh_BaseManager:
         """
         Publish to Zenoh keyexpr to let subscribers know that the simulation is running
         """
-        if self.transports_inited:
+        if self.pubs_inited:
             self.sim_running_pub.publish({"is_running": is_running})
 
     def close(self) -> None:
-        for t in self.transports:
-            t.close()
+        for pub in self.publishers:
+            pub.close()

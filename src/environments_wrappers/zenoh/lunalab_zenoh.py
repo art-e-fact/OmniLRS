@@ -45,9 +45,3 @@ class Zenoh_LunalabManager(Zenoh_BaseManager):
         Resets the lab to its initial state.
         """
         pass
-
-    def randomize_rocks(self, sample: zenoh.Sample):
-        data = int(sample.payload.to_string())
-        assert data > 0, "The number of rocks must be greater than 0."
-        self.modifications.append([self.LC.randomize_rocks, {"num": data}])
-        self.trigger_reset = True

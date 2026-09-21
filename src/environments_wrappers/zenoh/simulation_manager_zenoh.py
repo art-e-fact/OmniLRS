@@ -130,113 +130,64 @@ class Zenoh_SimulationManager:
             self.Zenoh_RM.get_RM().preload_robot(self.world)
 
     def _start_transports(self):
-        for t in self.Zenoh_EC.transports:
-            t.start()
-        self.Zenoh_EC.transports_inited = True
-
-        for t in self.Zenoh_RM.transports:
-            t.start()
-        self.Zenoh_RM.transports_inited = True
-
-    async def _randomize_rocks_sub(self):
-        sub = Sub(self.Zenoh_EC.rocks_randomize_keyexpr)
-
-        try:
-            async for sample in sub.listen_reliable():
-                logger.info("[ZenohSimulationManager] received cmd: randomize_rocks")
-                self.Zenoh_EC.randomize_rocks(sample)
-        finally:
-            sub.close()
-
-    async def _entry_point(self):
         """
-        Entry point for Zenoh subscribers using async manner.
+        Start publishers & subcribers from both environment & robot controllers
         """
-        async with asyncio.TaskGroup() as tg:
-            tg.create_task(self._randomize_rocks_sub())
-            # tg.create_task(..)
-            # tg.create_task(..)
 
-    def _on_update(self, event) -> None:
-        """
-        Called once per app frame by Isaac Sim's update event stream.
-        Runs synchronous simulation logic.
-        """
-        # Note: cannot use asyncio.create_task() here because it will complain "RuntimeError: no running event loop" -> had to use older api
-        if self._entry_task is None:
-            self._entry_task = asyncio.ensure_future(self._entry_point())
+        self.Zenoh_EC.start_publishing()
+        self.Zenoh_EC.start_listening()
 
-        if self._entry_task.done():
-            exc = self._entry_task.exception()
-            if exc:
-                logger.error(f"Exception: {repr(exc)}")
-
-            # notify
-            self.entry_task_is_done = True
-
-        self.rate.reset()
-
-        did_reset = False
-
-        if self.world.is_playing():
-            if self.world.current_time_step_index == 0:
-                self.world.reset()
-                did_reset = True
-                self.Zenoh_EC.reset()
-                self.Zenoh_RM.invalidate_articulation_api()
-                self.Zenoh_RM.reset_robot()
-                self.Zenoh_RM.apply_modifications()
-
-            if not did_reset:
-                # Must happen before periodic_update(), because LargeScale calls robot.get_pose().
-                self.Zenoh_RM.update_articulation_api()
-                self.Zenoh_EC.periodic_update(dt=self.world.get_physics_dt())
-                self.Zenoh_EC.apply_modifications()
-                if self.Zenoh_EC.trigger_reset:
-                    self.Zenoh_RM.invalidate_articulation_api()
-                    self.Zenoh_RM.reset()
-                    self.Zenoh_EC.trigger_reset = False
-                    did_reset = True
-                self.Zenoh_RM.apply_modifications()
-                if self.enable_deformation:
-                    if self.world.current_time_step_index >= (self.deform_delay * self.world.get_physics_dt()):
-                        self.Zenoh_EC.LC.deform_terrain()
-
-        if self.Zenoh_EC.transports_inited:
-            self.Zenoh_EC.pub_sim_is_running(True)
-
-        if self.Zenoh_RM.transports_inited:
-            self.Zenoh_RM.update_cmd()
-
-            if self.world.is_playing() and not did_reset:
-                self.Zenoh_RM.apply_modifications()
-                self.Zenoh_RM.publish_telemetry()
-                self.Zenoh_RM.publish_gt()
-
-        self.rate.sleep()
+        self.Zenoh_RM.start_publishing()
+        self.Zenoh_RM.start_listening()
 
     def run_simulation(self) -> None:
         """
-        Runs the simulation in async manner, using existing Isaac Sim's event loop.
+        Runs simulation in synchronous manner,
+        while zenoh's asyncio tasks has already been started in backend.
         """
 
         self.timeline.play()
-        self._entry_task = None
 
-        # Register a per-frame callback with Isaac Sim's app (ref: https://docs.omniverse.nvidia.com/dev-guide/latest/programmer_ref/events.html)
-        _update_sub = self.simulation_app._app.get_update_event_stream().create_subscription_to_pop(
-            self._on_update, name="zenoh_sim_step"
-        )
+        while self.simulation_app.is_running():
+            self.rate.reset()
+            
+            did_reset = False
+    
+            if self.world.is_playing():
+                if self.world.current_time_step_index == 0:
+                    self.world.reset()
+                    did_reset = True
+                    self.Zenoh_EC.reset()
+                    self.Zenoh_RM.invalidate_articulation_api()
+                    self.Zenoh_RM.reset_robot()
+                    self.Zenoh_RM.apply_modifications()
+    
+                if not did_reset:
+                    # Must happen before periodic_update(), because LargeScale calls robot.get_pose().
+                    self.Zenoh_RM.update_articulation_api()
+                    self.Zenoh_EC.periodic_update(dt=self.world.get_physics_dt())
+                    self.Zenoh_EC.apply_modifications()
+                    if self.Zenoh_EC.trigger_reset:
+                        self.Zenoh_RM.invalidate_articulation_api()
+                        self.Zenoh_RM.reset()
+                        self.Zenoh_EC.trigger_reset = False
+                        did_reset = True
+                    self.Zenoh_RM.apply_modifications()
+                    if self.enable_deformation:
+                        if self.world.current_time_step_index >= (self.deform_delay * self.world.get_physics_dt()):
+                            self.Zenoh_EC.LC.deform_terrain()
+    
+            if self.Zenoh_EC.pubs_inited:
+                self.Zenoh_EC.pub_sim_is_running(True)
+    
+            if self.Zenoh_RM.pubs_inited and self.world.is_playing() and not did_reset:
+                self.Zenoh_RM.apply_modifications()
+                self.Zenoh_RM.publish_telemetry()
+                self.Zenoh_RM.publish_gt()
+    
+            self.rate.sleep()
 
-        # Block the main thread simply by pumping the app until it closes.
-        # Isaac Sim's async engine drives the event loop between frames,
-        # so all tasks (ours + internal ones) get proper scheduling.
-        while self.simulation_app.is_running() and not self.entry_task_is_done:
             self.simulation_app.update()
-
-        # Cleanup
-        if self._entry_task is not None:
-            self._entry_task.cancel()
 
         self.Zenoh_EC.close()
         self.Zenoh_RM.close()

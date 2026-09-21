@@ -164,7 +164,7 @@ class JointForceBridge:
                 "source": "Robot cached articulation API",
                 "n_joints": len(joints_dict),
                 "n_contacts": 0,
-                "wire_format": self.zenoh_cfg.get("wire_format", "json"),
+                "wire_format": self.wire_format,
             },
         }
 

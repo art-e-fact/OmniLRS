@@ -27,16 +27,14 @@ class Zenoh_BaseManager:
 
         self.modifications: List[Tuple[callable, dict]] = []
 
-        self.robot_cfg = environment_cfg["robots_settings"]["parameters"]
-
         self.rocks_randomize_keyexpr = zenoh_cfg["keyexprs"]["randomize_rocks"]
 
         self.transports: List[ZenohPubTransport] = []
 
         self.sim_running_pub = ZenohPubTransport(
             keyexpr=zenoh_cfg["keyexprs"]["is_sim_running"],
-            wire_format= self.robot_cfg ["zenoh"]["is_sim_running"]["wire_format"],
-            is_logging= self.robot_cfg ["zenoh"]["is_sim_running"]["is_logging"],
+            wire_format="json",
+            is_logging=True,
             log_every_n= zenoh_cfg["pub_log_every_n"]
         )
         self.transports.append(self.sim_running_pub)

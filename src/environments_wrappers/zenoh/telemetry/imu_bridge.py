@@ -20,7 +20,10 @@ class IMUBridge:
 
         self.publish_period_s = self.robot_cfg["zenoh"]["imu"]["publish_period_s"]
 
-        self.wire_format = self.robot_cfg["zenoh"]["imu"]["wire_format"]
+        self.wire_format = self.robot_cfg["zenoh"]["imu"].get(
+            "wire_format",
+            self.zenoh_cfg["default_wire_format"],
+        )
 
         self.is_logging = self.robot_cfg["zenoh"]["imu"]["is_logging"]
         

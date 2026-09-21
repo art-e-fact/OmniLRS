@@ -37,7 +37,10 @@ class JointForceBridge:
         self.keep_history = self.robot_cfg["zenoh"]["joint_telemetry"]["keep_history"]
         self.history_len = self.robot_cfg["zenoh"]["joint_telemetry"]["history_len"]
 
-        self.wire_format = self.robot_cfg["zenoh"]["joint_telemetry"]["wire_format"]
+        self.wire_format = self.robot_cfg["zenoh"]["joint_telemetry"].get(
+            "wire_format",
+            self.zenoh_cfg["default_wire_format"],
+        )
 
         self.is_logging = self.robot_cfg["zenoh"]["joint_telemetry"]["is_logging"]
         

@@ -22,7 +22,10 @@ class CameraBridge:
         self.camera_cfg = self.robot_cfg["camera"]
         self.publish_period_s = self.robot_cfg["zenoh"]["camera"]["publish_period_s"]
 
-        self.wire_format = self.robot_cfg["zenoh"]["camera"]["wire_format"]
+        self.wire_format = self.robot_cfg["zenoh"]["camera"].get(
+            "wire_format",
+            self.zenoh_cfg["default_wire_format"],
+        )
 
         self.is_logging = self.robot_cfg["zenoh"]["camera"]["is_logging"]
 

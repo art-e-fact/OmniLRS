@@ -1,4 +1,5 @@
 name: Zenoh
+default_wire_format: "json"   # "json" | "msgspec" (camera uses raw ndarray / msgspec)
 pub_log_every_n: 50 # log frequency, shared by publishers
 sub_log_every_n: 5000 # log frequency, shared by subscribers
 

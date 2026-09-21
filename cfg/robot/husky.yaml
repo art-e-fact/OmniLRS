@@ -33,29 +33,19 @@ robots_settings:
     zenoh:
       camera:
         publish_period_s: 0.0333 # 30 hz
-        wire_format: "msgspec"
+        wire_format: "msgspec" # specify custom wire_format, not using default_wire_format in Zenoh.yaml  
         is_logging: True
       imu:
         publish_period_s: 0.02
-        wire_format: "json"
         is_logging: True
       joint_telemetry:
         publish_period_s: 0.1
-        wire_format: "json"
         init_retry_s: 0.5
         not_ready_log_period_s: 1.0
         keep_history: False
         history_len: 200
         is_logging: True
       joint_commands:
-        wire_format: "json"
         is_logging: True
       ground_truth_pose:
-        wire_format: "json"
-        is_logging: True
-      is_sim_running:
-        wire_format: "json"
-        is_logging: True
-      randomize_rocks:
-        wire_format: "json"
         is_logging: True

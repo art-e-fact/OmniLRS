@@ -4,7 +4,6 @@ __email__ = "ljburtz@jaops.com"
 
 import logging
 import time
-from typing import Optional
 
 from src.environments_wrappers.zenoh.transport.factory import make_transports
 from src.robots.robot import RobotManager

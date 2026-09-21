@@ -2,11 +2,9 @@ __author__ = "Shamistan Karimov, Elian NEPPEL, Bach Nguyen"
 __maintainer__ = "Louis Burtz"
 __email__ = "ljburtz@jaops.com"
 
-import asyncio
 import logging
 
 import omni
-from asyncio_for_robotics.zenoh.sub import Sub
 from isaacsim import SimulationApp
 from isaacsim.core.api.world import World
 

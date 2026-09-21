@@ -2,7 +2,6 @@ __author__ = "Shamistan Karimov, Bach Nguyen"
 __maintainer__ = "Louis Burtz"
 __email__ = "ljburtz@jaops.com"
 
-import zenoh
 
 from src.configurations.simulator_mode_enum import SimulatorMode
 from src.environments.lunalab import LunalabController

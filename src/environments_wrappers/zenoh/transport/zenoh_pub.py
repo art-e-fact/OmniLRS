@@ -5,14 +5,13 @@ __maintainer__ = "Louis Burtz"
 __email__ = "ljburtz@jaops.com"
 
 import logging
-from typing import Any, AsyncGenerator, Dict, Optional
+from typing import Any, Dict
 
 import asyncio_for_robotics.zenoh as afor
 import msgspec
 import numpy as np
-from asyncio_for_robotics.zenoh.sub import Sub
 
-from .wire import WireFormat, decode_payload, encode_payload, normalize_wire_format
+from .wire import WireFormat, encode_payload, normalize_wire_format
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +45,8 @@ class ZenohPubTransport:
 
         self._session = None
         self._pub = None
-        self._sub: Optional[Sub] = None
 
         self._array_encoder = msgspec.msgpack.Encoder()
-        self._array_decoder = msgspec.msgpack.Decoder(WireNDArray)
 
         self._publish_count = 0
 
@@ -122,76 +119,6 @@ class ZenohPubTransport:
         except Exception:
             logger.exception("failed to publish ndarray on %s", self.keyexpr)
 
-    async def subscribe_payload(self) -> AsyncGenerator[Any, None]:
-        logger.info("subscribing %s: %s", self.wire_format, self.keyexpr)
-        self._sub = Sub(self.keyexpr)
-
-        count = 0
-        try:
-            async for sample in self._sub.listen_reliable():
-                payload = bytes(sample.payload)
-                count += 1
-
-                if count == 1 or count % self.log_every_n == 0:
-                    logger.info(
-                        "received %s payload #%d on %s bytes=%d",
-                        self.wire_format,
-                        count,
-                        self.keyexpr,
-                        len(payload),
-                    )
-
-                try:
-                    yield decode_payload(payload, self.wire_format)
-                except Exception:
-                    logger.exception(
-                        "failed to decode %s payload on %s bytes=%d",
-                        self.wire_format,
-                        self.keyexpr,
-                        len(payload),
-                    )
-
-        finally:
-            logger.info("closing subscriber: %s", self.keyexpr)
-            self._sub.close()
-            self._sub = None
-
-    async def subscribe_array(self) -> AsyncGenerator[np.ndarray, None]:
-        logger.info("subscribing ndarray: %s", self.keyexpr)
-        self._sub = Sub(self.keyexpr)
-
-        count = 0
-        try:
-            async for sample in self._sub.listen_reliable():
-                payload = bytes(sample.payload)
-                count += 1
-
-                if count == 1 or count % self.log_every_n == 0:
-                    logger.info(
-                        "received ndarray payload #%d on %s bytes=%d",
-                        count,
-                        self.keyexpr,
-                        len(payload),
-                    )
-
-                wire_obj = self._array_decoder.decode(payload)
-                yield wire_obj.unpack()
-
-        finally:
-            logger.info("closing ndarray subscriber: %s", self.keyexpr)
-            self._sub.close()
-            self._sub = None
-
-    async def subscribe_json(self) -> AsyncGenerator[Dict[str, Any], None]:
-        if self.wire_format != "json":
-            raise ValueError("subscribe_json() requires wire_format='json'")
-        async for value in self.subscribe_payload():
-            yield value
-
-    async def subscribe(self) -> AsyncGenerator[Any, None]:
-        async for value in self.subscribe_payload():
-            yield value
-
     def close(self) -> None:
         logger.info("closing ZenohPubTransport: %s", self.keyexpr)
 
@@ -202,13 +129,6 @@ class ZenohPubTransport:
             except Exception:
                 logger.exception("failed to undeclare publisher: %s", self.keyexpr)
 
-        if self._sub:
-            try:
-                self._sub.close()
-                logger.info("subscriber closed: %s", self.keyexpr)
-            except Exception:
-                logger.exception("failed to close subscriber: %s", self.keyexpr)
-
         if self._session:
             try:
                 self._session.close()
@@ -218,4 +138,3 @@ class ZenohPubTransport:
 
         self._session = None
         self._pub = None
-        self._sub = None

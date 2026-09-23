@@ -120,3 +120,4 @@ class Zenoh_LargeScaleManager(Zenoh_BaseManager):
 
         self.subscribers.clear()
         self.subs_inited = False
+        super().close()

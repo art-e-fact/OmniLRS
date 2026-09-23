@@ -110,3 +110,4 @@ class Zenoh_LunaryardManager(Zenoh_BaseManager):
 
         self.subscribers.clear()
         self.subs_inited = False
+        super().close()

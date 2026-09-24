@@ -34,18 +34,18 @@ robots_settings:
       camera:
         publish_period_s: 0.0333 # 30 hz
         wire_format: "msgspec" # specify custom wire_format, not using default_wire_format in Zenoh.yaml  
-        is_logging: True
+        is_logging: False
       imu:
         publish_period_s: 0.02
-        is_logging: True
+        is_logging: False
       joint_telemetry:
         publish_period_s: 0.1
         init_retry_s: 0.5
         not_ready_log_period_s: 1.0
         keep_history: False
         history_len: 200
-        is_logging: True
+        is_logging: False
       joint_commands:
-        is_logging: True
+        is_logging: False
       ground_truth_pose:
-        is_logging: True
+        is_logging: False
